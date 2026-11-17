@@ -9,3 +9,7 @@ The core's isolated namespace tests passed BBR per-socket selection and real IPv
 Account-flow mocks, UI payload tests and the vendor-locked Vue build passed. A direct interface-bound HTTPS check over the active LTE link passed. These results do not establish bonded VPN throughput.
 
 Not validated: a second live LTE modem (no second SIM was fitted), paid account activation, live VPN bonding/throughput, failover, DNS/IPv6 leak prevention, kill switch, or other hardware/firmware. A matching name pattern alone is not evidence of a working second modem. No account sign-in was completed and no VPN Connect action was executed in these checks.
+
+## Automatic installer verification
+
+On 17 November 2026 the published installer ran successfully on the RUTX12 with --prepare-only. It fetched the official Speedify IPK and public support/native payloads over HTTPS, verified all pinned hashes, assembled the private runtime and passed loader checks. Every generated core file matched the already installed, previously tested runtime byte-for-byte. No installation or VPN state change was made by this check. A complete first installation through the new top-level bootstrap on a clean router has not yet been exercised; the underlying core and native installers were tested separately.

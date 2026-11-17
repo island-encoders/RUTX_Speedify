@@ -77,6 +77,7 @@ if [ "$PREPARE" = 1 ];then
  exit 0
 fi
 if [ -d /usr/local/speedify-rutos ];then
+ /usr/local/speedify-rutos/bin/manage-port --load-dependencies
  /usr/local/speedify-rutos/bin/manage-port --check || die 'Existing core installation is incompatible; resolve it before continuing.'
  echo 'Compatible core already installed; retaining it and its account state.'
 else
