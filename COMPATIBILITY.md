@@ -4,7 +4,7 @@ Only the RUTX12 has been tested. The installer checks exact firmware, CPU, kerne
 
 | Model | Status | Expected use |
 | --- | --- | --- |
-| RUTX12 | Tested on RutOS 7.26.2 / kernel 6.6.137 | Ethernet plus raw-IP LTE detection validated; second live modem and actual VPN bonding still unvalidated |
+| RUTX12 | Tested on RutOS 7.26.2 / kernel 6.6.137 | Ethernet and both internal raw-IP LTE modems detected; independent HTTPS on all three passed; actual VPN bonding unvalidated |
 | RUTX09, RUTX11, RUTX14, RUTX50, RUTXR1 | Same-SDK candidates, untested | Potential cellular/Ethernet use, subject to actual modem interface type, matching baseline and testing |
 | RUTX08, RUTX10 | Same-SDK candidates, untested | Wired/Wi-Fi WAN use as available; these models do not have an integrated cellular modem |
 | RUT/RUTM/RUTC/TRB and other families | Unsupported by this release | Different architectures, kernel builds or native integrations require a separate port |
