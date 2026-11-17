@@ -1,0 +1,31 @@
+#!/bin/sh
+set -eu
+R=/usr/local/speedify-rutos
+NS=sfy-web-prepare
+umask 077
+mkdir -p /etc/speedify-rutos/state /etc/speedify-rutos/keys /tmp/sfy-web-prepare
+ip netns add "$NS"
+pid=
+cleanup() {
+ [ -z "$pid" ] || { kill "$pid" 2>/dev/null || true; sleep 1; kill -9 "$pid" 2>/dev/null || true; wait "$pid" 2>/dev/null || true; }
+ ip netns del "$NS" 2>/dev/null || true
+}
+trap cleanup EXIT
+ip -n "$NS" link set lo up
+ip -n "$NS" -6 addr add ::2/128 dev lo nodad
+ip netns exec "$NS" "$R/bin/run-speedify" daemon -d /etc/speedify-rutos/state -r "$R/runtime" -g /tmp/sfy-web-prepare -k /etc/speedify-rutos/keys >/tmp/sfy-web-prepare/daemon.txt 2>&1 &
+pid=$!
+i=0
+until ip netns exec "$NS" "$R/bin/run-speedify" cli state >/dev/null 2>&1; do
+ i=$((i+1)); [ "$i" -lt 20 ] || exit 1; sleep 1
+done
+if [ ! -f /etc/speedify-rutos/role-configured ]; then
+ ip netns exec "$NS" "$R/bin/run-speedify" cli devicerole router >/dev/null
+ touch /etc/speedify-rutos/role-configured
+fi
+ip netns exec "$NS" "$R/bin/run-speedify" cli disconnect >/dev/null
+ip netns exec "$NS" "$R/bin/run-speedify" cli route default off >/dev/null
+ip netns exec "$NS" "$R/bin/run-speedify" cli startupconnect off >/dev/null
+ip netns exec "$NS" "$R/bin/run-speedify" cli show settings >/tmp/sfy-web-prepare/settings.json
+lua -e 'local j=require("luci.jsonc");local f=io.open("/tmp/sfy-web-prepare/settings.json");local s=j.parse(f:read("*a"));assert(s.enableDefaultRoute==false and s.startupConnect==false)'
+sleep 2

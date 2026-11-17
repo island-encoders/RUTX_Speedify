@@ -1,0 +1,14 @@
+{
+  "firmware": "RUTX_R_00.07.26.2",
+  "kernel": "6.6.137",
+  "source_sha256": {
+    "RUTX_R_SDK_00.07.26.2.tar.gz": "42091eca4d8999db8995f51a6dd4eb6da97caf12074ad7e0fe12da338a34692f",
+    "iptables-1.8.10.tar.xz": "5cc255c189356e317d070755ce9371eb63a1b783c34498fb8c30264f3cc59c9c",
+    "speedify.ipk": "15b19220ecedec1c4d84731e0d0d2e19fd41bdd45e15eda5d0262d616859ea08",
+    "libkeyutils1_armhf.deb": "bfc6a3a668b58b88876b9e37192f669ceeb68db6d50c8374a9267a2bbd8f8a8e",
+    "stock-tun-6.6.137.ko": "6c206fdaa7e28e7c9bbceb2831c9f0443b0e9ce2f1393699a1a3047e7cb5afc7"
+  },
+  "sdk_url": "https://firmware.teltonika-networks.com/7.26.2/RUTX/RUTX_R_SDK_00.07.26.2.tar.gz",
+  "iptables_source_url": "https://www.netfilter.org/projects/iptables/files/iptables-1.8.10.tar.xz",
+  "stock_module_source": "Read-only retrieval from the user router after official firmware upgrade"
+}

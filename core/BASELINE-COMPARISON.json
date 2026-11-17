@@ -1,0 +1,30 @@
+{
+  ".text": {
+    "stock_bytes": 29044,
+    "built_bytes": 29044,
+    "equal": true,
+    "stock_sha256": "cf043af478b414a91619d07ec04dc5c7dd56471b1b76b7157f51c3646fa53a39",
+    "built_sha256": "cf043af478b414a91619d07ec04dc5c7dd56471b1b76b7157f51c3646fa53a39"
+  },
+  ".init.text": {
+    "stock_bytes": 172,
+    "built_bytes": 172,
+    "equal": true,
+    "stock_sha256": "24b91e4c1a78db35c6c859cd7dde93df0fd2221fcb1d2496ceacbebc2e0beab1",
+    "built_sha256": "24b91e4c1a78db35c6c859cd7dde93df0fd2221fcb1d2496ceacbebc2e0beab1"
+  },
+  ".exit.text": {
+    "stock_bytes": 44,
+    "built_bytes": 44,
+    "equal": true,
+    "stock_sha256": "33873371650860114b4dc739bcf778dd9f82382fd39d601e2bf01b282c2fe853",
+    "built_sha256": "33873371650860114b4dc739bcf778dd9f82382fd39d601e2bf01b282c2fe853"
+  },
+  ".rodata": {
+    "stock_bytes": 1340,
+    "built_bytes": 1340,
+    "equal": true,
+    "stock_sha256": "574034b5b5340fdaf4a2aaa3720231627ec2099a555b1b77c9cbbe7a1cbbdbc0",
+    "built_sha256": "574034b5b5340fdaf4a2aaa3720231627ec2099a555b1b77c9cbbe7a1cbbdbc0"
+  }
+}

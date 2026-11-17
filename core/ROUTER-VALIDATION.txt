@@ -1,0 +1,79 @@
+Speedify RutOS 7.26.2 port validation, 16 November 2026
+RUTX_R_00.07.26.2
+6.6.137
+bin/check-platform: OK
+bin/check-runtime: OK
+bin/init-xtables: OK
+bin/load-kmods: OK
+bin/manage-port: OK
+bin/native-probe: OK
+bin/run-speedify: OK
+bin/smoke-test: OK
+config/speedify_rutos: OK
+dependencies.json: OK
+init.d/speedify-rutos: OK
+kmods/nf_socket_ipv4.ko: OK
+kmods/nf_socket_ipv6.ko: OK
+kmods/nf_tproxy_ipv4.ko: OK
+kmods/nf_tproxy_ipv6.ko: OK
+kmods/sfy_udp_lookup.ko: OK
+kmods/tcp_bbr.ko: OK
+kmods/xt_addrtype.ko: OK
+kmods/xt_owner.ko: OK
+kmods/xt_pkttype.ko: OK
+kmods/xt_quota.ko: OK
+kmods/xt_socket.ko: OK
+kmods/xt_TPROXY.ko: OK
+licenses/keyutils-copyright: OK
+manifest.json: OK
+plugins/libxt_addrtype.so: OK
+plugins/libxt_owner.so: OK
+plugins/libxt_pkttype.so: OK
+plugins/libxt_quota.so: OK
+plugins/libxt_socket.so: OK
+plugins/libxt_TPROXY.so: OK
+runtime/cacert.pem: OK
+runtime/lib/arm-linux-gnueabihf/ld-linux-armhf.so.3: OK
+runtime/lib/arm-linux-gnueabihf/libanl.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libBrokenLocale.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libc.so.6: OK
+runtime/lib/arm-linux-gnueabihf/libc_malloc_debug.so.0: OK
+runtime/lib/arm-linux-gnueabihf/libdl.so.2: OK
+runtime/lib/arm-linux-gnueabihf/libgcc_s.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libkeyutils.so: OK
+runtime/lib/arm-linux-gnueabihf/libkeyutils.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libkeyutils.so.1.10: OK
+runtime/lib/arm-linux-gnueabihf/libm.so.6: OK
+runtime/lib/arm-linux-gnueabihf/libmemusage.so: OK
+runtime/lib/arm-linux-gnueabihf/libnsl.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libnss_compat.so.2: OK
+runtime/lib/arm-linux-gnueabihf/libnss_dns.so.2: OK
+runtime/lib/arm-linux-gnueabihf/libnss_files.so.2: OK
+runtime/lib/arm-linux-gnueabihf/libnss_hesiod.so.2: OK
+runtime/lib/arm-linux-gnueabihf/libpcprofile.so: OK
+runtime/lib/arm-linux-gnueabihf/libpthread.so.0: OK
+runtime/lib/arm-linux-gnueabihf/libresolv.so.2: OK
+runtime/lib/arm-linux-gnueabihf/librt.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libthread_db.so.1: OK
+runtime/lib/arm-linux-gnueabihf/libutil.so.1: OK
+runtime/speedify: OK
+runtime/speedify_cli: OK
+Platform check: 0 blocker(s).
+Private kernel dependencies loaded. Default TCP congestion control was not changed.
+Platform check: 0 blocker(s).
+BBR per-socket selection passed.
+IPv4 UDP transparent proxy packet test passed.
+IPv6 UDP transparent proxy packet test passed.
+Daemon and CLI smoke test passed in an isolated network namespace.
+Test evidence retained at /tmp/sfy-smoke.FIiLcN
+Enabled flag:
+0
+Network-ready flag:
+0
+inactive
+Boot enable exit: 1 (1 means disabled)
+Host policy comparison exit: 0
+Host firewall comparison exit: 0
+Default TCP congestion control:
+cubic
+Namespaces remaining:

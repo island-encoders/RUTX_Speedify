@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+LIB="$ROOT/runtime/lib/arm-linux-gnueabihf"
+case "${1:-}" in
+    daemon) PROGRAM=speedify ;;
+    cli) PROGRAM=speedify_cli ;;
+    *) echo 'Usage: run-speedify daemon|cli [arguments...]' >&2; exit 2 ;;
+esac
+shift
+if [ -d "$ROOT/xtables" ]; then export XTABLES_LIBDIR="$ROOT/xtables"; fi
+# No LD_LIBRARY_PATH export: native musl child processes keep their own loader.
+exec "$LIB/ld-linux-armhf.so.3" --library-path "$LIB" "$ROOT/runtime/$PROGRAM" "$@"

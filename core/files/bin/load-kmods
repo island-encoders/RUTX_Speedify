@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+[ "$(id -u)" = 0 ] || { echo 'Root required'; exit 1; }
+[ "$(cat /etc/version)" = RUTX_R_00.07.26.2 ] || { echo 'Wrong firmware'; exit 1; }
+[ "$(uname -r)" = 6.6.137 ] || { echo 'Wrong kernel'; exit 1; }
+(cd "$ROOT" && sha256sum -c SHA256SUMS >/dev/null)
+for stock in nf_defrag_ipv4 nf_defrag_ipv6; do
+    [ -d "/sys/module/$stock" ] || modprobe "$stock"
+done
+for name in sfy_udp_lookup tcp_bbr nf_tproxy_ipv4 nf_tproxy_ipv6 nf_socket_ipv4 nf_socket_ipv6 xt_TPROXY xt_socket xt_addrtype xt_owner xt_pkttype xt_quota; do
+    [ ! -d "/sys/module/$name" ] || continue
+    file="$ROOT/kmods/$name.ko"
+    # RutOS's small modinfo searches its registered module directories and
+    # cannot inspect a private absolute path. The builder already checked the
+    # ELF .modinfo section; recheck its hash and stored vermagic here.
+    magic=$(strings "$file" | sed -n 's/^vermagic=//p' | sed 's/[[:space:]]*$//')
+    [ "$magic" = '6.6.137 SMP mod_unload ARMv7 p2v8' ] || { echo "Wrong module ABI: $name"; exit 1; }
+    insmod "$file"
+done
+echo 'Private kernel dependencies loaded. Default TCP congestion control was not changed.'

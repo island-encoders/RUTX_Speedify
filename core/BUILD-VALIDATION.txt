@@ -1,0 +1,11 @@
+test_failed_stock_comparison_rejected (__main__.DependencyTests.test_failed_stock_comparison_rejected) ... ok
+test_modified_input_hash_rejected (__main__.DependencyTests.test_modified_input_hash_rejected) ... ok
+test_real_build_passes (__main__.DependencyTests.test_real_build_passes) ... ok
+test_wrong_kernel_module_rejected (__main__.DependencyTests.test_wrong_kernel_module_rejected) ... ok
+test_wrong_native_plugin_architecture_rejected (__main__.DependencyTests.test_wrong_native_plugin_architecture_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.616s
+
+OK
+Shell and build-script syntax checks passed.

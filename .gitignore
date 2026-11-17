@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+node_modules/
+.env*
+work/
+runtime/
+*.ipk
+*.deb
+*.bin
+*.ko
+*backup*
+known_hosts

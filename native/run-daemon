@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+R=/usr/local/speedify-rutos
+W=/usr/local/speedify-native
+L=$R/runtime/lib/arm-linux-gnueabihf
+export XTABLES_LIBDIR="$R/xtables"
+# Loader --preload applies to this executable only; musl children stay native.
+exec "$L/ld-linux-armhf.so.3" --library-path "$L" --preload "$W/rawip-compat.so" "$R/runtime/speedify" "$@"

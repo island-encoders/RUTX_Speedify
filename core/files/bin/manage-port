@@ -1,0 +1,188 @@
+#!/bin/sh
+# Install files separately from network configuration and activation.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+DEST=/usr/local/speedify-rutos
+ACTION=${1:---check}
+die() { echo "$*" >&2; exit 1; }
+platform_identity() {
+    [ "$(cat /etc/version)" = RUTX_R_00.07.26.2 ] || die 'Firmware mismatch.'
+    [ "$(uname -m)" = armv7l ] || die 'CPU mismatch.'
+    [ "$(uname -r)" = 6.6.137 ] || die 'Kernel mismatch.'
+    [ "$(opkg status kernel-6.6.137 | awk '/^Version:/ {print $2}')" = 6.6-r0 ] || die 'Kernel package mismatch.'
+}
+case "$ACTION" in
+    --check)
+        platform_identity
+        "$ROOT/bin/check-runtime"
+        "$ROOT/bin/check-platform"
+        ;;
+    --load-dependencies)
+        platform_identity
+        "$ROOT/bin/init-xtables"
+        "$ROOT/bin/load-kmods"
+        "$ROOT/bin/check-platform"
+        ;;
+    --install-files)
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        platform_identity
+        [ ! -e "$DEST" ] || die 'Already installed; upgrades require separate review.'
+        [ ! -e /etc/init.d/speedify-rutos ] || die 'Init path already exists.'
+        [ ! -e /etc/config/speedify_rutos ] || die 'UCI path already exists.'
+        [ -z "$(uci changes speedify_rutos)" ] || die 'Uncommitted UCI changes exist.'
+        (cd "$ROOT" && sha256sum -c SHA256SUMS) || die 'Payload checksum failure.'
+        space=$(df -k /usr/local | awk 'NR==2 {print $4}')
+        [ "${space:-0}" -ge 24576 ] || die 'Need 24 MiB free persistent storage.'
+        "$ROOT/bin/check-runtime" || die 'ELF loading failed.'
+        # Known writable RutOS overlay, independent of opkg relocation/symlinks.
+        mkdir "$DEST"
+        init_written=0
+        config_written=0
+        install_rollback() {
+            code=$?
+            trap - EXIT HUP INT TERM
+            [ "$init_written" = 0 ] || rm -f /etc/init.d/speedify-rutos
+            [ "$config_written" = 0 ] || rm -f /etc/config/speedify_rutos
+            # This invocation exclusively created this fixed private directory.
+            rm -rf /usr/local/speedify-rutos
+            echo 'Incomplete private installation removed.' >&2
+            exit "$code"
+        }
+        trap install_rollback EXIT
+        trap 'exit 129' HUP
+        trap 'exit 130' INT
+        trap 'exit 143' TERM
+        # Copy only hash-listed regular payload files. A previously smoke-tested
+        # staging tree may also contain generated xtables symlinks; omit those.
+        while IFS= read -r line; do
+            relative=${line#*  }
+            case "$relative" in /*|../*|*/../*|*/..|..) die 'Unsafe manifest path.';; esac
+            [ -f "$ROOT/$relative" ] && [ ! -L "$ROOT/$relative" ] || die 'Payload must contain regular files.'
+            mkdir -p "$DEST/$(dirname "$relative")"
+            cp "$ROOT/$relative" "$DEST/$relative"
+        done < "$ROOT/SHA256SUMS"
+        cp "$ROOT/SHA256SUMS" "$DEST/SHA256SUMS"
+        chmod -R go-w "$DEST"
+        "$DEST/bin/init-xtables"
+        (cd "$DEST" && sha256sum -c SHA256SUMS >/dev/null) || die 'Installed payload checksum failure.'
+        init_written=1
+        cp "$DEST/init.d/speedify-rutos" /etc/init.d/speedify-rutos
+        chmod 755 /etc/init.d/speedify-rutos
+        config_written=1
+        cp "$DEST/config/speedify_rutos" /etc/config/speedify_rutos
+        chmod 600 /etc/config/speedify_rutos
+        trap - EXIT HUP INT TERM
+        echo 'Private files installed and verified. Service is disabled; no networking changes or daemon start performed.'
+        ;;
+    --configure-network)
+        [ "${2:-}" = --ack-network-change ] || die 'Use --configure-network --ack-network-change from local Ethernet.'
+        [ "$ROOT" = "$DEST" ] || die 'Install files first.'
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        "$ROOT/bin/check-platform" || die 'Resolve kernel/iptables requirements first.'
+        [ -z "$(uci changes network)$(uci changes firewall)" ] || die 'Commit or revert existing UCI changes first.'
+        uci -q show firewall | grep -q "\.name='lan'" || die 'No firewall zone named lan; adapt the forwarding configuration.'
+        for spec in network.sfyrut firewall.sfyrut firewall.sfyrut_lan; do
+            if uci -q get "$spec" >/dev/null; then die "Section already exists: $spec"; fi
+        done
+        umask 077
+        mkdir -p /etc/speedify-rutos
+        backup=/etc/speedify-rutos/network-before-$(date +%Y%m%d-%H%M%S).tar.gz
+        tar -czf "$backup" /etc/config/network /etc/config/firewall
+        rollback() {
+            code=$?
+            trap - EXIT HUP INT TERM
+            echo "Network setup failed; restoring saved network/firewall configuration from $backup" >&2
+            uci revert network || true
+            uci revert firewall || true
+            tar -xzf "$backup" -C / || true
+            /etc/init.d/network reload || true
+            /etc/init.d/firewall reload || true
+            uci set speedify_rutos.core.network_ready=0 || true
+            uci commit speedify_rutos || true
+            exit "$code"
+        }
+        trap rollback EXIT
+        trap 'exit 129' HUP
+        trap 'exit 130' INT
+        trap 'exit 143' TERM
+        uci batch <<'UCI_EOF'
+set network.sfyrut=interface
+set network.sfyrut.proto=none
+set network.sfyrut.device=connectify0
+set network.sfyrut.ifname=connectify0
+set network.sfyrut.defaultroute=0
+set firewall.sfyrut=zone
+set firewall.sfyrut.name=sfyrut
+set firewall.sfyrut.input=REJECT
+set firewall.sfyrut.output=ACCEPT
+set firewall.sfyrut.forward=REJECT
+set firewall.sfyrut.masq=1
+set firewall.sfyrut.mtu_fix=1
+add_list firewall.sfyrut.network=sfyrut
+set firewall.sfyrut_lan=forwarding
+set firewall.sfyrut_lan.src=lan
+set firewall.sfyrut_lan.dest=sfyrut
+UCI_EOF
+        uci commit network
+        uci commit firewall
+        /etc/init.d/network reload
+        /etc/init.d/firewall reload
+        uci set speedify_rutos.core.network_ready=1
+        uci commit speedify_rutos
+        trap - EXIT HUP INT TERM
+        echo "Network sections created. Backup: $backup"
+        echo 'No WAN policy, DNS or IPv6 leak policy is changed here. Review those before enabling.'
+        ;;
+    --enable)
+        [ "${2:-}" = --ack-start-daemon ] || die 'Use --enable --ack-start-daemon after WAN/DNS/IPv6 review.'
+        [ "$ROOT" = "$DEST" ] || die 'Install files first.'
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        "$ROOT/bin/check-platform"
+        [ "$(uci -q get speedify_rutos.core.network_ready)" = 1 ] || die 'Configure/review network first.'
+        uci set speedify_rutos.core.enabled=1
+        uci commit speedify_rutos
+        /etc/init.d/speedify-rutos start
+        /etc/init.d/speedify-rutos enable
+        echo 'Service start requested. Check service/log status; activate your Router License through the CLI.'
+        ;;
+    --disable)
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        [ "$ROOT" = "$DEST" ] || die 'Run the installed copy.'
+        uci set speedify_rutos.core.enabled=0
+        uci commit speedify_rutos
+        /etc/init.d/speedify-rutos stop
+        /etc/init.d/speedify-rutos disable
+        echo 'Service disabled. Configuration and private runtime retained.'
+        ;;
+    --unconfigure-network)
+        [ "${2:-}" = --ack-network-change ] || die 'Use --unconfigure-network --ack-network-change from local Ethernet.'
+        [ "$ROOT" = "$DEST" ] || die 'Run the installed copy.'
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        [ -z "$(uci changes network)$(uci changes firewall)" ] || die 'Existing uncommitted network/firewall changes.'
+        [ "$(uci -q get network.sfyrut.device)" = connectify0 ] || die 'Network section differs; inspect it manually.'
+        [ "$(uci -q get firewall.sfyrut.name)" = sfyrut ] || die 'Firewall section differs; inspect it manually.'
+        [ "$(uci -q get firewall.sfyrut_lan.dest)" = sfyrut ] || die 'Forwarding section differs; inspect it manually.'
+        "$ROOT/bin/manage-port" --disable
+        uci delete network.sfyrut
+        uci delete firewall.sfyrut
+        uci delete firewall.sfyrut_lan
+        uci commit network
+        uci commit firewall
+        uci set speedify_rutos.core.network_ready=0
+        uci commit speedify_rutos
+        /etc/init.d/network reload
+        /etc/init.d/firewall reload
+        echo 'Port-owned network sections removed. Original WAN settings retained.'
+        ;;
+    --remove-files)
+        [ "$ROOT" = "$DEST" ] || die 'Run the installed copy.'
+        [ "$(id -u)" = 0 ] || die 'Root required.'
+        [ "$(uci -q get speedify_rutos.core.network_ready)" = 0 ] || die 'Unconfigure the port network first.'
+        "$ROOT/bin/manage-port" --disable
+        rm /etc/init.d/speedify-rutos /etc/config/speedify_rutos
+        # Fixed, dedicated install path checked against the running script above.
+        rm -rf /usr/local/speedify-rutos
+        echo 'Private runtime removed. Account data/backups under /etc/speedify-rutos retained.'
+        ;;
+    *) die 'Usage: manage-port --check|--install-files|--load-dependencies|--configure-network --ack-network-change|--enable --ack-start-daemon|--disable|--unconfigure-network --ack-network-change|--remove-files' ;;
+esac

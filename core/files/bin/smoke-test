@@ -1,0 +1,53 @@
+#!/bin/sh
+# Real daemon/CLI test with no access to the router's WAN or routing tables.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+NS=sfy-port-smoke
+[ "$(id -u)" = 0 ] || { echo 'Root required'; exit 1; }
+ip netns list | grep -q "^$NS\( \|$\)" && { echo 'Test namespace already exists'; exit 1; }
+"$ROOT/bin/init-xtables"
+"$ROOT/bin/load-kmods"
+"$ROOT/bin/check-platform"
+TEST=$(mktemp -d /tmp/sfy-smoke.XXXXXX)
+mkdir "$TEST/state" "$TEST/keys" "$TEST/logs"
+pid=
+cleanup() {
+    code=$?
+    trap - EXIT HUP INT TERM
+    if [ -n "$pid" ]; then
+        kill "$pid" 2>/dev/null || true
+        sleep 1
+        kill -KILL "$pid" 2>/dev/null || true
+        wait "$pid" 2>/dev/null || true
+    fi
+    ip netns delete "$NS" 2>/dev/null || true
+    echo "Test evidence retained at $TEST"
+    exit "$code"
+}
+trap cleanup EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+ip netns add "$NS"
+ip -n "$NS" link set lo up
+ip -n "$NS" -6 addr add ::2/128 dev lo nodad
+ip netns exec "$NS" env XTABLES_LIBDIR="$ROOT/xtables" iptables -t mangle -A PREROUTING -p udp --dport 19002 -j TPROXY --on-ip 127.0.0.1 --on-port 19001
+ip netns exec "$NS" env XTABLES_LIBDIR="$ROOT/xtables" ip6tables -t mangle -A PREROUTING -p udp --dport 19002 -j TPROXY --on-ip ::1 --on-port 19001
+ip netns exec "$NS" "$ROOT/bin/native-probe"
+ip netns exec "$NS" env XTABLES_LIBDIR="$ROOT/xtables" iptables -t mangle -F PREROUTING
+ip netns exec "$NS" env XTABLES_LIBDIR="$ROOT/xtables" ip6tables -t mangle -F PREROUTING
+ip netns exec "$NS" "$ROOT/bin/run-speedify" daemon -d "$TEST/state" -r "$ROOT/runtime" -g "$TEST/logs" -k "$TEST/keys" >"$TEST/daemon.txt" 2>&1 &
+pid=$!
+attempt=0
+while [ "$attempt" -lt 20 ]; do
+    kill -0 "$pid" 2>/dev/null || { cat "$TEST/daemon.txt"; exit 1; }
+    if ip netns exec "$NS" "$ROOT/bin/run-speedify" cli show settings >"$TEST/settings.json" 2>"$TEST/cli.txt"; then
+        echo 'Daemon and CLI smoke test passed in an isolated network namespace.'
+        exit 0
+    fi
+    attempt=$((attempt+1))
+    sleep 1
+done
+cat "$TEST/daemon.txt"
+echo 'Daemon/CLI did not become ready.' >&2
+exit 1

@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+LIB="$ROOT/runtime/lib/arm-linux-gnueabihf"
+[ "$(uname -m)" = armv7l ] || { echo 'Wrong CPU'; exit 1; }
+for binary in speedify speedify_cli; do
+    "$LIB/ld-linux-armhf.so.3" --inhibit-cache --library-path "$LIB" --list "$ROOT/runtime/$binary"
+done
+# libkeyutils is dlopened by Speedify; it does not appear under DT_NEEDED.
+"$LIB/ld-linux-armhf.so.3" --inhibit-cache --library-path "$LIB" --list "$LIB/libkeyutils.so.1"
+echo 'ELF loading checks passed; daemon and tunnel were not started.'

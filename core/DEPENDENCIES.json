@@ -1,0 +1,109 @@
+{
+  "firmware": "RUTX_R_00.07.26.2",
+  "kernel": "6.6.137",
+  "kernel_package": "6.6-r0",
+  "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+  "compiler": "arm-poky-linux-gnueabi-gcc (GCC) 13.4.0 / Teltonika 7.26.2 SDK",
+  "iptables": "1.8.10 / libxtables.so.12.7.0",
+  "baseline_sections_match": {
+    ".text": {
+      "stock_bytes": 29044,
+      "built_bytes": 29044,
+      "equal": true,
+      "stock_sha256": "cf043af478b414a91619d07ec04dc5c7dd56471b1b76b7157f51c3646fa53a39",
+      "built_sha256": "cf043af478b414a91619d07ec04dc5c7dd56471b1b76b7157f51c3646fa53a39"
+    },
+    ".init.text": {
+      "stock_bytes": 172,
+      "built_bytes": 172,
+      "equal": true,
+      "stock_sha256": "24b91e4c1a78db35c6c859cd7dde93df0fd2221fcb1d2496ceacbebc2e0beab1",
+      "built_sha256": "24b91e4c1a78db35c6c859cd7dde93df0fd2221fcb1d2496ceacbebc2e0beab1"
+    },
+    ".exit.text": {
+      "stock_bytes": 44,
+      "built_bytes": 44,
+      "equal": true,
+      "stock_sha256": "33873371650860114b4dc739bcf778dd9f82382fd39d601e2bf01b282c2fe853",
+      "built_sha256": "33873371650860114b4dc739bcf778dd9f82382fd39d601e2bf01b282c2fe853"
+    },
+    ".rodata": {
+      "stock_bytes": 1340,
+      "built_bytes": 1340,
+      "equal": true,
+      "stock_sha256": "574034b5b5340fdaf4a2aaa3720231627ec2099a555b1b77c9cbbe7a1cbbdbc0",
+      "built_sha256": "574034b5b5340fdaf4a2aaa3720231627ec2099a555b1b77c9cbbe7a1cbbdbc0"
+    }
+  },
+  "modules": {
+    "sfy_udp_lookup": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": ""
+    },
+    "tcp_bbr": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": ""
+    },
+    "nf_tproxy_ipv4": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "sfy_udp_lookup"
+    },
+    "nf_tproxy_ipv6": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "sfy_udp_lookup"
+    },
+    "nf_socket_ipv4": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "sfy_udp_lookup"
+    },
+    "nf_socket_ipv6": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "sfy_udp_lookup"
+    },
+    "xt_TPROXY": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables,nf_defrag_ipv6,nf_defrag_ipv4,nf_tproxy_ipv6,nf_tproxy_ipv4"
+    },
+    "xt_socket": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables,nf_socket_ipv6,nf_socket_ipv4,nf_defrag_ipv6,nf_defrag_ipv4"
+    },
+    "xt_addrtype": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables"
+    },
+    "xt_owner": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables"
+    },
+    "xt_pkttype": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables"
+    },
+    "xt_quota": {
+      "vermagic": "6.6.137 SMP mod_unload ARMv7 p2v8",
+      "depends": "x_tables"
+    }
+  },
+  "files": {
+    "kmods/sfy_udp_lookup.ko": "07a440cd70f80c1b56995a7837fbf00f828113e4a5eb99a6177985c2865afe1d",
+    "kmods/tcp_bbr.ko": "e365ad8f7db00977f7dcafee01bac405d54c2ae164209d981495aeacba7c2427",
+    "kmods/nf_tproxy_ipv4.ko": "f1c70cef315b6e9701fcda507f96202d3e0e4ff2947c242e85b6707a30d9408f",
+    "kmods/nf_tproxy_ipv6.ko": "21f4dd02c5c0bd8ae85c46e1735561693a6f544134888961b0ba7e35cf5b9e48",
+    "kmods/nf_socket_ipv4.ko": "86a136b935bd86c9b960861ad32d1540507fcadc7f63ef5fda8297b152dbb93e",
+    "kmods/nf_socket_ipv6.ko": "bfa764c6f7602242aa0e38af8fc7966731f5e1f281fcf9d504d3d8f88f993933",
+    "kmods/xt_TPROXY.ko": "300b29bb33937bf4388c01bba71cc05ae3828caea3beb4521bad482df2465e1b",
+    "kmods/xt_socket.ko": "69b7bd07630cf08b7461e4a0f8aab8b602ed7898e8483edaf0ab0799a4083237",
+    "kmods/xt_addrtype.ko": "8227d9f49ce502ae233bd0b9451fc1954d7c2f7e1f43d4a424a9cb02ce134ccf",
+    "kmods/xt_owner.ko": "81cd8a2e70eb9c1999223ba216fc9cbb5bdfcb804e34956aadabfc41d250c9b3",
+    "kmods/xt_pkttype.ko": "42c93c5d61192a6b9b01e908270eb82da989bb4d8076f49b3a535acaff81575d",
+    "kmods/xt_quota.ko": "98c7482f2def2e63ab4fa9931af32e7c055e3a7e841a1abcfab7015560318de4",
+    "plugins/libxt_TPROXY.so": "841b9167b9c6be732f8ff19f82b3d0f642d4dc952d12adc9fec92509bccd83c8",
+    "plugins/libxt_addrtype.so": "0cadd60fe7b3ba5721535829afcca66ca91348bdbfb75b6d2556bbab948c9d9a",
+    "plugins/libxt_socket.so": "12507ca8a74d76aceb6f4b4ce688870fa70a6fa99d329d57365c248560b27947",
+    "plugins/libxt_owner.so": "d6c07075eefaa6e86a67aa1bb635e5061c2bb27617154653eb3c21e6c725b6fd",
+    "plugins/libxt_pkttype.so": "ab0d3c0298d9a097daf1237423daf517f7e404c5b84cd289a3852dd9c7001a53",
+    "plugins/libxt_quota.so": "f29ddf4ddbca305735fcad5b4cc3e21b51e20b407e11141e4667879722979f1c",
+    "bin/native-probe": "626373d13a2f957bdec732b0351d82a72b7e2ef2bdcc136c292f0e1ca488de45"
+  }
+}

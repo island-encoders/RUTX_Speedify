@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+START=13
+STOP=91
+start() {
+ P=/usr/local/speedify-native
+ [ "$(cat /etc/version)" = RUTX_R_00.07.26.2 ] || return 1
+ [ -f "$P/services-wrapper.lua" ] && [ -f "$P/vendor-services.lua" ] || return 1
+ if ! grep -q ' /usr/lib/lua/api/status/services.lua ' /proc/mounts;then
+  mount -o bind "$P/services-wrapper.lua" /usr/lib/lua/api/status/services.lua
+ fi
+}
+stop() {
+ if grep -q ' /usr/lib/lua/api/status/services.lua ' /proc/mounts;then
+  umount /usr/lib/lua/api/status/services.lua
+ fi
+}

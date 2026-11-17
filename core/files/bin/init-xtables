@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+mkdir -p "$ROOT/xtables"
+for folder in /usr/lib/iptables /usr/local/usr/lib/iptables; do
+    for file in "$folder"/*.so; do
+        [ -f "$file" ] || continue
+        target="$ROOT/xtables/$(basename "$file")"
+        [ -e "$target" ] || ln -s "$file" "$target"
+    done
+done
+for file in "$ROOT"/plugins/*.so; do
+    [ -f "$file" ] || continue
+    ln -sf "$file" "$ROOT/xtables/$(basename "$file")"
+done

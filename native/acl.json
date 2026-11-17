@@ -1,0 +1,1 @@
+{"services/vpn/speedify":{"description":"Speedify router activation, bonding and monitoring","read":{"api":{"/speedify/*":["*"]}},"write":{"api":["/speedify/actions/execute"]}}}

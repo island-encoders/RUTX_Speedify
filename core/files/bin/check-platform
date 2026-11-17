@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+failures=0
+bad() { echo "BLOCKED: $*"; failures=$((failures+1)); }
+[ "$(cat /etc/version)" = RUTX_R_00.07.26.2 ] || bad 'Firmware differs from inspected 7.26.2 target.'
+[ "$(uname -m)" = armv7l ] || bad 'CPU differs from ARMv7 target.'
+[ "$(uname -r)" = 6.6.137 ] || bad 'Kernel release differs.'
+actual=$(opkg status kernel-6.6.137 | awk '/^Version:/ {print $2}')
+[ "$actual" = 6.6-r0 ] || bad 'Kernel package differs.'
+[ -c /dev/net/tun ] || bad 'TUN is unavailable.'
+# These checks require modules to have been loaded through firmware-matched packages.
+for module in tcp_bbr nf_tproxy_ipv4 nf_tproxy_ipv6 xt_TPROXY xt_addrtype; do
+    [ -d "/sys/module/$module" ] || bad "$module is not loaded/built in."
+done
+XTABLES_LIBDIR="$ROOT/plugins" iptables -j TPROXY -h 2>/dev/null | grep -q -- '--on-port' || bad 'Native iptables TPROXY userspace extension is unavailable.'
+XTABLES_LIBDIR="$ROOT/plugins" iptables -m addrtype -h 2>/dev/null | grep -q -- '--dst-type' || bad 'Native iptables addrtype extension is unavailable.'
+grep -qw bbr /proc/sys/net/ipv4/tcp_available_congestion_control || bad 'BBR is not registered.'
+echo "Platform check: $failures blocker(s)."
+[ "$failures" -eq 0 ]

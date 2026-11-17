@@ -1,0 +1,1 @@
+[{"endpoint":"/speedify/{service_group}/{?sid}","lua_service":"services/speedify"}]
