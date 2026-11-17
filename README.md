@@ -15,7 +15,7 @@ An experimental integration that brings Speedify account sign-in, bonding settin
 
 ## Current status
 
-Native integration **0.4.0**, core runtime port **0.3.0**, Speedify **17.3.0-12956**. Tested on **RUTX12, RUTX_R_00.07.26.2, Linux 6.6.137, ARMv7 Cortex-A7**.
+Native integration **0.4.1**, core runtime port **0.3.0**, Speedify **17.3.0-12956**. Tested on **RUTX12, RUTX_R_00.07.26.2, Linux 6.6.137, ARMv7 Cortex-A7**.
 
 Ethernet and one active LTE modem are detected. The second modem had no SIM during testing. The matcher handles all numeric `qmimux` names, but two live cellular links have **not** been validated. Sign-in URL generation and native API controls pass; paid account activation, live VPN bonding, throughput, failover, DNS/IPv6 leak prevention and a kill switch are **not validated**.
 

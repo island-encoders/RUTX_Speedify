@@ -1,5 +1,8 @@
 #!/bin/sh
 set -eu
+# Public code/metadata must remain readable to RutOS's unprivileged web service.
+# Account state helpers set their own private umask separately.
+umask 022
 cd "$(dirname "$0")"
 [ "$(id -u)" = 0 ] || { echo 'Root required';exit 1; }
 [ "$(cat /etc/version)" = RUTX_R_00.07.26.2 ] && [ "$(uname -r)" = 6.6.137 ] || { echo 'Requires RUTX 7.26.2 / kernel 6.6.137';exit 1; }
@@ -16,8 +19,8 @@ if [ ! -f "$P/vendor-services.lua" ];then
 fi
 # Wrapper is deliberately pinned to this firmware and preserves its original collector.
 lua -e 'local s=assert(loadfile("/usr/local/speedify-native/vendor-services.lua"))();local _,f=debug.getupvalue(s.GET_TYPE_status,1);assert(type(f)=="function")'
-if [ -x /etc/init.d/speedify-control ];then /etc/init.d/speedify-control stop || true;fi
-if [ -x /etc/init.d/speedify-agent ];then /etc/init.d/speedify-agent stop || true;fi
+if [ -x /etc/init.d/speedify-control ] && /etc/init.d/speedify-control running;then /etc/init.d/speedify-control stop;fi
+if [ -x /etc/init.d/speedify-agent ] && /etc/init.d/speedify-agent running;then /etc/init.d/speedify-agent stop;fi
 cp controller.lua agent.lua run-daemon safe-start rawip-compat.so rawip-type services-wrapper.lua "$P/"
 mkdir -p /usr/local/usr/lib/lua/api/services /usr/local/usr/lib/lua/api/status /usr/local/usr/share/vuci/path.d /usr/local/usr/share/vuci/menu.d /usr/local/usr/share/rpcd/acl.d /usr/local/usr/share/acl.d
 cp account.lua /usr/local/usr/lib/lua/speedify_account.lua
@@ -47,6 +50,9 @@ chmod -R go-w "$P"
 ubus call session reload_acls
 ubus send vuci.notify '{"event":"reload_routes"}'
 /etc/init.d/uhttpd restart
-if [ -x /etc/init.d/speedify-web ];then /etc/init.d/speedify-web stop || true;/etc/init.d/speedify-web disable;fi
+if [ -x /etc/init.d/speedify-web ];then
+ if /etc/init.d/speedify-web running;then /etc/init.d/speedify-web stop;fi
+ /etc/init.d/speedify-web disable
+fi
 echo 'Installed native Services > VPN > Speedify. Refresh the RutOS browser page.'
 echo 'The former separate web server is stopped and disabled.'

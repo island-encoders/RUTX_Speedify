@@ -1,11 +1,12 @@
 #!/bin/sh
 # Download and assemble the official client on the router. No vendor scripts run.
 set -eu
+umask 022
 BASE=https://raw.githubusercontent.com/island-encoders/RUTX_Speedify/main
 SPEEDIFY_URL=https://downloads.speedify.com/speedify_arm_cortex-a7_neon-vfpv4.ipk
 SPEEDIFY_HASH=15b19220ecedec1c4d84731e0d0d2e19fd41bdd45e15eda5d0262d616859ea08
 SUPPORT_HASH=165d91a60929e4fc4e1815c235723d33cddf8a3cbbbc7e0a5654b43ce751d3b7
-NATIVE_HASH=f6f84a40ee41e1c18695912e2586b0982298c313f655e14948cecf26cc3e832b
+NATIVE_HASH=78128a5aff62100d12403684afd184b36717dd0e319b427da12167f587dac147
 TUN_HASH=6c206fdaa7e28e7c9bbceb2831c9f0443b0e9ce2f1393699a1a3047e7cb5afc7
 PREPARE=0
 ALLOW_UNTESTED=0
@@ -51,7 +52,7 @@ fetch() {
 echo "Target: $MODEL / RUTX_R_00.07.26.2 / kernel 6.6.137"
 fetch "$SPEEDIFY_URL" "$WORK/speedify.ipk" "$SPEEDIFY_HASH"
 fetch "$BASE/downloads/rutx-7.26.2-core-support.tar.gz" "$WORK/support.tar.gz" "$SUPPORT_HASH"
-fetch "$BASE/downloads/speedify-native-0.4.0-rutx7262.tar.gz" "$WORK/native.tar.gz" "$NATIVE_HASH"
+fetch "$BASE/downloads/speedify-native-0.4.1-rutx7262.tar.gz" "$WORK/native.tar.gz" "$NATIVE_HASH"
 mkdir "$WORK/support" "$WORK/vendor-outer" "$WORK/vendor" "$WORK/native"
 tar -xzf "$WORK/support.tar.gz" -C "$WORK/support"
 (cd "$WORK/support" && sha256sum -c SHA256SUMS >/dev/null) || die 'Support payload verification failed.'

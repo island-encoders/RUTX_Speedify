@@ -1,4 +1,4 @@
-Speedify native RutOS integration - experimental 0.4.0
+Speedify native RutOS integration - experimental 0.4.1
 Published source and native package. See ../README.md, ../INSTALL.md and ../docs/VALIDATION.md for current status and contribution guidance.
 
 Page: https://192.168.1.1/services/vpn/speedify

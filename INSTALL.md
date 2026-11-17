@@ -25,15 +25,15 @@ Build the core archive and install it as described in `core/README.txt`. Check i
 Download the archive and `.sha256` file from `downloads/`, check the checksum, and copy the archive to the router. For routers without SFTP, legacy SCP may be required:
 
 ```sh
-sha256sum -c speedify-native-0.4.0-rutx7262.tar.gz.sha256
-scp -O speedify-native-0.4.0-rutx7262.tar.gz root@192.168.1.1:/tmp/
+sha256sum -c speedify-native-0.4.1-rutx7262.tar.gz.sha256
+scp -O speedify-native-0.4.1-rutx7262.tar.gz root@192.168.1.1:/tmp/
 ```
 
 On the matching router, with the core runtime already installed:
 
 ```sh
 mkdir -p /tmp/speedify-native-install
-tar -xzf /tmp/speedify-native-0.4.0-rutx7262.tar.gz -C /tmp/speedify-native-install
+tar -xzf /tmp/speedify-native-0.4.1-rutx7262.tar.gz -C /tmp/speedify-native-install
 cd /tmp/speedify-native-install/speedify-native
 sha256sum -c SHA256SUMS
 sh install.sh
